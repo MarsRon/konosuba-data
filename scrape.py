@@ -120,7 +120,10 @@ def main():
       file.write(text)
   
   with open('konosuba.txt','wb') as wfd:
-    for f in glob('./data/[0-9][0-9][0-9]*'):
+    files = glob('./data/[0-9][0-9][0-9]*')
+    file_re = re.compile(r"(\d{3}) ")
+    files.sort(key=lambda x: int(file_re.search(x)[1]))
+    for f in files:
       with open(f,'rb') as fd:
         shutil.copyfileobj(fd, wfd)
 
