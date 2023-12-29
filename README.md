@@ -1,19 +1,43 @@
 # KonoSuba Data
 
-Webscrapes KonoSuba Light Novel from Volume 1-17 + short stories (English fan
-translation) from [cgtranslations.me](https://cgtranslations.me/konosuba) and
-[crimsonmagic.me](https://crimsonmagic.me/konosuba/volumes-10-plus/).
+Text data of KonoSuba: God's Blessing on This Wonderful World! Light Novel
+Volume 1 to 17 + short stories (English fan translation).
+
+> Note:\
+> Most of the unrelated metadata/TL note have been removed.\
+> This might have accidentally removed some lines from the light novel, but the damage should be minimal.\
+> Feel free to create an issue if there are some lines that have been accidentally removed.
+
+
+## Context
+
+KonoSuba: God's Blessing on This Wonderful World!, often referred to simply as KonoSuba,
+is a Japanese light novel series written by Natsume Akatsuki.
+The series follows Kazuma Satou, a boy who is sent to a fantasy world with MMORPG elements
+following his death, where he forms a dysfunctional adventuring party with a goddess, an archwizard, and a crusader.
+
+Source: https://en.wikipedia.org/wiki/KonoSuba
+
 
 ## Usage
 
-The full data is located at
-[`konosuba.txt`](https://github.com/MarsRon/konosuba-data/blob/main/konosuba.txt).
-Just download it or whatever.
+Download the files below.
 
-### I wanna DIY
+| File | Description |
+|-|-|
+| [`konosuba.txt`](./konosuba.txt) | 17 volumes of KonoSuba light novel condensed into 1 file. Everything is included. |
+| [`konosuba-speech.txt`](./konosuba-speech.txt) | Contains only dialogues in between quotes (`“”`). Monologue is excluded. |
 
-If you want to manually generate the data yourself, I recommend using a proxy/VPN
-before running the webscraper.
+Shameless self-plug:
+- Wanna make a Markov chain random sentence generator? Check out
+[`aqua`](https://github.com/MarsRon/aqua).
+- Wanna make a AI chatbot? Check out
+[`kazuma`](https://github.com/MarsRon/kazuma).
+
+
+## I wanna DIY
+
+If you want to manually generate the data yourself, I recommend using a proxy/VPN before running the webscraper.
 
 Clone the project.
 ```sh
@@ -35,3 +59,24 @@ Run the webscraper.
 ```sh
 python scrape.py
 ```
+
+This will create a `./data` directory which temporarily stores each chapter from Volume 1 to Volume 17 in text form.
+
+Then, the script will merge all the posts into `konosuba.txt` and also generate `konosuba-speech.txt` only from speeches.
+
+
+## Acknowledgements
+
+The data is scraped from [cgtranslations.me](https://cgtranslations.me/konosuba)
+and [crimsonmagic.me](https://crimsonmagic.me/konosuba/volumes-10-plus/).
+
+
+## License
+
+Distributed under the MIT License.
+See [`LICENSE.md`](./LICENSE.md) for more information.
+
+
+## Contact
+
+MarsRon - marsron204@gmail.com - [marsron.name.my](https://marsron.name.my)
