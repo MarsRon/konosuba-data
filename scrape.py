@@ -277,7 +277,7 @@ def main():
     konosuba_speech.write(speeches_text)
   
   print("Done.")
-  print("Checkout konosuba.txt and konosuba-speech.txt for your Konosuba needs :p")
+  print("Checkout konosuba.txt and konosuba-speech.txt for your KonoSuba needs :p")
 
 if __name__ == '__main__':
   main()
