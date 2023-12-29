@@ -1,2 +1,3 @@
 venv/
 data/
+http_cache.sqlite

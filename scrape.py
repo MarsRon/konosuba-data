@@ -2,7 +2,7 @@ import re, shutil
 from glob import glob
 from pathlib import Path
 from collections.abc import Iterable
-import requests
+from requests_cache import CachedSession
 from bs4 import BeautifulSoup as bs
 from tqdm import tqdm # (if using normal .py files)
 # from tqdm.notebook import tqdm # (if using Jupyter notebook)
@@ -15,9 +15,11 @@ from tqdm import tqdm # (if using normal .py files)
 #   'https': proxies_list
 # }
 
+session = CachedSession(expire_after=60 * 60 * 24) # Cache for 1 day
+
 def scrape(url: str) -> bs:
   try:
-    r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+    r = session.get(url, headers={'User-Agent': 'Mozilla/5.0'})
     soup = bs(r.text, 'html.parser')
   except Exception as e:
     print(e)
@@ -66,33 +68,131 @@ def scrape_main_page():
   return links
 
 def scrape_post(link: str):
-  metadata_re = re.compile(r"^(?:TL|Edit(?:ing|ors?)|Translat(?:or|ion)|<TL Note):", flags=re.IGNORECASE)
-  sub_title_re = re.compile(r"^(?:TL|Edit(?:ing|ors?)|Translat(?:or|ion)|(?:Pro|Epi)logue|Chapter)", flags=re.IGNORECASE)
-
-  print(f'Scraping {link}...')
-  
+  # Download the page
   page = scrape(link)
 
   title = page.find(re.compile('h[12]'), class_='entry-title').get_text()
   content_div = page.find('div', class_='entry-content')
 
+  # Filters
+  sub_title_re = re.compile(
+    r"^(?:TL|Edit(?:ing|ors?)|Translat(?:or|ion)|(?:Pro|Epi)logue|Chapter)",
+    flags=re.IGNORECASE
+  )
   sub_title_tag = content_div.find(['h1', 'h2'])
+  if link.find('crimsonmagic.me') != -1:
+    # Apply for crimsonmagic.me only
+    strong_tag = content_div.select_one('hr~p>strong')
+    if strong_tag is None:
+      strong_tag = content_div.select_one('hr~p>b')
+    if strong_tag is not None:
+      sub_title_tag = strong_tag.parent
   if sub_title_tag is None:
     sub_title_tag = content_div.find('p', string=sub_title_re)
   if sub_title_tag is None:
+    # Just use first p tag as subtitle
     sub_title_tag = content_div.find('p')
+    print('WARNING: USING FIRST P: ' + link)
 
-  contents = list(sub_title_tag.find_next_siblings('p'))
-  for tag in contents:
+  afterwords_re = re.compile('afterword', flags=re.IGNORECASE)
+  afterwords_tag = content_div.find(['h1', 'h2'], string=afterwords_re)
+  if afterwords_tag is not None:
+    # Remove stuff after that
     try:
-      tag.a.decompose()
+      for tag in afterwords_tag.find_next_siblings('p'):
+        tag.decompose()
+      afterwords_tag.decompose()
+      print('AFTERWORDS: ' + link)
+    except:
+      pass
+  
+  notes_re_list = [
+    '^Notes about this chapter:',
+    '^Extra Note(?:s|\(s\) ):',
+  ]
+  notes_re = re.compile('|'.join(notes_re_list), flags=re.IGNORECASE)
+  notes_tag = content_div.find('p', string=notes_re)
+  if notes_tag is not None:
+    # Remove notes after that
+    try:
+      for tag in notes_tag.find_next_siblings('p'):
+        tag.decompose()
+      notes_tag.decompose()
+      print('NOTES: ' + link)
+    except:
+      pass
+  
+  if link.find('crimsonmagic.me') != -1:
+    # Apply for crimsonmagic.me only
+    quiz_tag = content_div.select_one('h1>strong')
+    try:
+      if quiz_tag.get_text() == 'QUIZ TIME:':
+    # Remove quiz after that
+        for tag in quiz_tag.parent.find_next_siblings('p'):
+          tag.decompose()
+        quiz_tag.decompose()
+        print('QUIZ: '+link)
     except:
       pass
 
-  texts = [tag.get_text(strip=True) for tag in contents]
+  # Get text content from all p
+  contents = list(sub_title_tag.find_next_siblings('p'))
+  for tag in contents:
+    # Remove links inside p
+    try:
+      for a in tag.find_all('a'):
+        a.decompose()
+    except:
+      pass
+
+  # More filters
+  texts = map(lambda tag: tag.get_text(strip=True), contents) # Get texts
   texts = filter(None, texts) # Remove blanks
-  texts = filter(lambda x: not metadata_re.match(x), texts)
+  # this crazy ass regex list :skull:
+  metadata_re_list = map(lambda x: '^'+x, [
+    'TL',
+    'Edit(?:ing|ors?)',
+    'Translat(?:or|ion):',
+    '[<[{]TL Note',
+    'Afterdrawing',
+    'Illustrator’s afterart',
+    r'Pa[rt]t \d+?',
+    r'Chapter \d+?',
+    'Preview:',
+    'Next volume preview',
+    'Source @ ?CGtranslations.me',
+    'Updated:',
+    r'Translated by yuNS @ crimsonmagic \. me',
+    r'END OF CHAPTER \d+?',
+    r'Share this:LikeLoading\.\.\.Related',
+    'Vol 12 Gamers exclusive short story',
+    r'\[',
+    '<Incidentally',
+    '<See:',
+    '<Important Note:',
+    '<Thanks to Kasen',
+    '<Press F for Kazuma',
+    'Because the illustrators failed to include any pictures of Lord Zereshrute',
+    'Because they once again failed to include any pictures of Duke’s face',
+    'Well, this is the last short story that I have for volume 13',
+    'Anyway, it’s been a fun time. I hope you’ve enjoyed volume 13',
+    '(Thanks to Ulti and Kasen for providing these)',
+    'Volume 15 will be running all throughout the month of January',
+    'Coloured illustrations: Kasen',
+    '(Thanks to Ulti and Kasen for providing these)',
+    'From the Digital Special Edition',
+  ])
+  metadata_re = re.compile('|'.join(metadata_re_list), flags=re.IGNORECASE)
+  texts = filter(lambda x: not metadata_re.match(x), texts) # Remove TL metadata
+  chap_nav_re = re.compile(r'^\|(?: Next Chapt?er)?')
+  texts = filter(lambda x: not bool(chap_nav_re.match(x)), texts) # Remove chapter nav from crimsonmagic.me
+  texts = map(lambda x: re.compile(r'…\.+').sub('…', x), texts) # Remove trailing period from "…."
+  texts = map(lambda x: re.compile(r'(TL Note:.+?)', flags=re.IGNORECASE).sub('', x), texts) # Remove (TL Note: xxxx)
   text = '\n'.join(list(texts))
+  
+  # Special case of afterword lmao
+  if title.find('Volume 10, Epilogue + Side Stories') != -1:
+    text = re.sub('Author’s Afterword[\s\S]+Akatsuki Natsume\n', '', text)
 
   return (title, text)
 
@@ -105,27 +205,31 @@ def main():
   for index, link in enumerate(tqdm(links)):
     id = str(index).rjust(3, '0')
     
-    if glob(f'./data/{id}*'):
-      continue # skip already downloaded
+    # if glob(f'./data/{id}*'):
+    #   continue # skip already downloaded
 
+    print(f'Scraping {id} {link}...')
     title, text = scrape_post(link)
 
-    if len(text) <= 300:
+    if text.count('\n') <= 10:
       text = '' # Skip because it's probably manga
 
-    text = f"Source: {link}\n{text}" # Include source link in file
-    safe_title = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", "_", title)
+    text = f"Source: {link}\n{text}".rstrip() # Include source link in file
+    safe_title = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", '_', title)
 
     with open(f"./data/{id} {safe_title}.txt", 'w') as file:
       file.write(text)
+      file.write('\n')
   
+  print('Combining all chapters to konosuba.txt...')
   with open('konosuba.txt','wb') as wfd:
     files = glob('./data/[0-9][0-9][0-9]*')
     file_re = re.compile(r"(\d{3}) ")
     files.sort(key=lambda x: int(file_re.search(x)[1]))
     for f in files:
       with open(f,'rb') as fd:
+        fd.readline() # Skip first line (source link)
         shutil.copyfileobj(fd, wfd)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   main()
