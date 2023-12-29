@@ -26,7 +26,7 @@ Download the files below.
 | File | Description |
 |-|-|
 | [`konosuba.txt`](./konosuba.txt) | 17 volumes of KonoSuba light novel condensed into 1 file. Everything is included. |
-| [`konosuba-speech.txt`](./konosuba-speech.txt) | Contains only dialogues in between quotes (`“”`). Monologue is excluded. |
+| [`konosuba-dialogue.txt`](./konosuba-dialogue.txt) | Contains only dialogues in between quotes (`“”`). Monologue is excluded. |
 
 Shameless self-plug:
 - Wanna make a Markov chain random sentence generator? Check out
@@ -62,7 +62,7 @@ python scrape.py
 
 This will create a `./data` directory which temporarily stores each chapter from Volume 1 to Volume 17 in text form.
 
-Then, the script will merge all the posts into `konosuba.txt` and also generate `konosuba-speech.txt` only from speeches.
+Then, the script will merge all the posts into `konosuba.txt` and also generate `konosuba-dialogue.txt` only from speeches.
 
 
 ## Acknowledgements

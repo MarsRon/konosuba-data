@@ -252,13 +252,13 @@ def main():
         fd.readline() # Skip first line (source link)
         shutil.copyfileobj(fd, wfd)
   
-  print('Extracting speeches from konosuba.txt to konosuba-speech.txt...')
+  print('Extracting dialogues from konosuba.txt to konosuba-dialogue.txt...')
   with open('konosuba.txt', 'r') as konosuba:
     lines = konosuba.readlines()
 
-    speech_re = re.compile(r'“(.+?)”')
-    def get_speech(line: str):
-      matches = speech_re.findall(line)
+    dialogue_re = re.compile(r'“(.+?)”')
+    def get_dialogue(line: str):
+      matches = dialogue_re.findall(line)
       if len(matches) > 0:
         return matches
       return ''
@@ -268,16 +268,16 @@ def main():
     def filter_silence(line: str):
       return not bool(silence_re.match(line))
 
-    speeches = flatten(map(get_speech, lines))
-    speeches = filter(filter_silence, speeches)
-    speeches = filter(None, speeches) # Filter blanks
-    speeches_text = '\n'.join(speeches)
+    dialogues = flatten(map(get_dialogue, lines))
+    dialogues = filter(filter_silence, dialogues)
+    dialogues = filter(None, dialogues) # Filter blanks
+    dialogues_text = '\n'.join(dialogues)
   
-  with open('konosuba-speech.txt', 'w') as konosuba_speech:
-    konosuba_speech.write(speeches_text)
+  with open('konosuba-dialogue.txt', 'w') as konosuba_dialogue:
+    konosuba_dialogue.write(dialogues_text)
   
   print("Done.")
-  print("Checkout konosuba.txt and konosuba-speech.txt for your KonoSuba needs :p")
+  print("Check out konosuba.txt and konosuba-dialogue.txt for all of your KonoSuba needs :p")
 
 if __name__ == '__main__':
   main()
