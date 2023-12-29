@@ -190,7 +190,7 @@ def scrape_post(link: str):
     'From the Digital Special Edition',
   ])
   metadata_re = re.compile('|'.join(metadata_re_list), flags=re.IGNORECASE)
-  texts = filter(lambda x: not metadata_re.match(x), texts) # Remove TL metadata
+  texts = filter(lambda x: not bool(metadata_re.match(x)), texts) # Remove TL metadata
   chap_nav_re = re.compile(r'^\|(?: Next Chapt?er)?')
   texts = filter(lambda x: not bool(chap_nav_re.match(x)), texts) # Remove chapter nav from crimsonmagic.me
   texts = map(lambda x: re.compile(r'…\.+').sub('…', x), texts) # Remove trailing period from "…."
@@ -204,40 +204,64 @@ def scrape_post(link: str):
   return (title, text)
 
 def main():
-  links = scrape_main_page()
+  # links = scrape_main_page()
   
-  # Create data folder
-  Path('./data').mkdir(parents=True, exist_ok=True)
+  # # Create data folder
+  # Path('./data').mkdir(parents=True, exist_ok=True)
 
-  for index, link in enumerate(tqdm(links)):
-    id = str(index).rjust(3, '0')
+  # for index, link in enumerate(tqdm(links)):
+  #   id = str(index).rjust(3, '0')
     
-    # if glob(f'./data/{id}*'):
-    #   continue # skip already downloaded
+  #   # if glob(f'./data/{id}*'):
+  #   #   continue # skip already downloaded
 
-    print(f'Scraping {id} {link}...')
-    title, text = scrape_post(link)
+  #   print(f'Scraping {id} {link}...')
+  #   title, text = scrape_post(link)
 
-    if text.count('\n') <= 10:
-      text = '' # Skip because it's probably manga
+  #   if text.count('\n') <= 10:
+  #     text = '' # Skip because it's probably manga
 
-    text = f"Source: {link}\n{text}".rstrip() # Include source link in file
-    safe_title = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", '_', title)
+  #   text = f"Source: {link}\n{text}".rstrip() # Include source link in file
+  #   safe_title = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", '_', title)
 
-    with open(f"./data/{id} {safe_title}.txt", 'w') as file:
-      file.write(text)
-      file.write('\n')
+  #   with open(f"./data/{id} {safe_title}.txt", 'w') as file:
+  #     file.write(text)
+  #     file.write('\n')
   
-  print('Combining all chapters to konosuba.txt...')
-  with open('konosuba.txt','wb') as wfd:
-    files = glob('./data/[0-9][0-9][0-9]*')
-    file_re = re.compile(r"(\d{3}) ")
-    files.sort(key=lambda x: int(file_re.search(x)[1]))
+  # print('Combining all chapters to konosuba.txt...')
+  # with open('konosuba.txt','wb') as wfd:
+  #   files = glob('./data/[0-9][0-9][0-9]*')
+  #   file_re = re.compile(r"(\d{3}) ")
+  #   files.sort(key=lambda x: int(file_re.search(x)[1]))
     
-    for f in files:
-      with open(f,'rb') as fd:
-        fd.readline() # Skip first line (source link)
-        shutil.copyfileobj(fd, wfd)
+  #   for f in files:
+  #     with open(f,'rb') as fd:
+  #       fd.readline() # Skip first line (source link)
+  #       shutil.copyfileobj(fd, wfd)
+  
+  print('Extracting speeches from konosuba.txt')
+  with open('konosuba.txt', 'r') as konosuba:
+    lines = konosuba.readlines()
+
+    speech_re = re.compile(r'“(.+?)”')
+    def get_speech(line: str):
+      matches = speech_re.findall(line)
+      if len(matches) > 0:
+        return matches
+      return ''
+    
+    # Remove awkward ...
+    silence_re = re.compile(r'^[… ]+?$')
+    def filter_silence(line: str):
+      return not bool(silence_re.match(line))
+
+    speeches = flatten(map(get_speech, lines))
+    speeches = filter(filter_silence, speeches)
+    speeches = filter(None, speeches) # Filter blanks
+    speeches_text = '\n'.join(speeches)
+  
+  with open('konosuba-speech.txt', 'w') as konosuba_speech:
+    konosuba_speech.write(speeches_text)
 
 if __name__ == '__main__':
   main()
