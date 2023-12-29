@@ -23,10 +23,10 @@ Source: https://en.wikipedia.org/wiki/KonoSuba
 
 Download the files below.
 
-| File | Description |
-|-|-|
-| [`konosuba.txt`](./konosuba.txt) | 17 volumes of KonoSuba light novel condensed into 1 file. Everything is included. |
-| [`konosuba-dialogue.txt`](./konosuba-dialogue.txt) | Contains only dialogues in between quotes (`“”`). Monologue is excluded. |
+| File | Lines | Size | Description |
+|-|-|-|-|
+| [`konosuba.txt`](./konosuba.txt) | 47573 | 4.5MB | 17 volumes of KonoSuba light novel condensed into 1 file. Both dialogue and monologue are included. |
+| [`konosuba-dialogue.txt`](./konosuba-dialogue.txt) | 18689 | 2.3MB | Contains only dialogues in between quotes (`“”`). Monologue is excluded. |
 
 Shameless self-plug:
 - Wanna make a Markov chain random sentence generator? Check out
