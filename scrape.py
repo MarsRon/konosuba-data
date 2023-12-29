@@ -5,34 +5,41 @@ from collections.abc import Iterable
 from requests_cache import CachedSession
 from bs4 import BeautifulSoup as bs
 from tqdm import tqdm # (if using normal .py files)
-# from tqdm.notebook import tqdm # (if using Jupyter notebook)
-
-# with open('proxies_list.txt') as file:
-#   proxies_list = [line.rstrip() for line in file]
-
-# proxies = {
-#   'http': map(proxies_list),
-#   'https': proxies_list
-# }
 
 session = CachedSession(expire_after=60 * 60 * 24) # Cache for 1 day
 
-def scrape(url: str) -> bs:
+def scrape(url: str):
+  """Download and parse a webpage using BeautifulSoup
+
+  Args:
+      url (str): URL of the webpage.
+
+  Returns:
+      BeautifulSoup: The page.
+  """
   try:
     r = session.get(url, headers={'User-Agent': 'Mozilla/5.0'})
     soup = bs(r.text, 'html.parser')
+    return soup
   except Exception as e:
     print(e)
-  
-  return soup
 
 def get_links_from_page(page: bs) -> list[str]:
+  """Get all the anchor tags from a page's content
+
+  Args:
+      page (BeautifulSoup): The page.
+
+  Returns:
+      list[str]: List of URLs.
+  """
   content_div = page.find('div', class_='entry-content')
   a_tags = content_div.find_all('a', href=True)
   links: list[str] = [a.get('href') for a in a_tags]
   return links
 
 def flatten(xs):
+  """https://stackoverflow.com/a/2158532/16259910"""
   for x in xs:
     if isinstance(x, Iterable) and not isinstance(x, (str, bytes)):
       yield from flatten(x)
@@ -226,6 +233,7 @@ def main():
     files = glob('./data/[0-9][0-9][0-9]*')
     file_re = re.compile(r"(\d{3}) ")
     files.sort(key=lambda x: int(file_re.search(x)[1]))
+    
     for f in files:
       with open(f,'rb') as fd:
         fd.readline() # Skip first line (source link)
