@@ -4,7 +4,7 @@ from pathlib import Path
 from collections.abc import Iterable
 from requests_cache import CachedSession
 from bs4 import BeautifulSoup as bs
-from tqdm import tqdm # (if using normal .py files)
+from tqdm import tqdm
 
 session = CachedSession(expire_after=60 * 60 * 24) # Cache for 1 day
 
@@ -99,7 +99,7 @@ def scrape_post(link: str):
   if sub_title_tag is None:
     # Just use first p tag as subtitle
     sub_title_tag = content_div.find('p')
-    print('WARNING: USING FIRST P: ' + link)
+    # print('USING FIRST P TAG: ' + link)
 
   afterwords_re = re.compile('afterword', flags=re.IGNORECASE)
   afterwords_tag = content_div.find(['h1', 'h2'], string=afterwords_re)
@@ -109,7 +109,7 @@ def scrape_post(link: str):
       for tag in afterwords_tag.find_next_siblings('p'):
         tag.decompose()
       afterwords_tag.decompose()
-      print('AFTERWORDS: ' + link)
+      # print('AFTERWORDS: ' + link)
     except:
       pass
   
@@ -125,7 +125,7 @@ def scrape_post(link: str):
       for tag in notes_tag.find_next_siblings('p'):
         tag.decompose()
       notes_tag.decompose()
-      print('NOTES: ' + link)
+      # print('NOTES: ' + link)
     except:
       pass
   
@@ -138,7 +138,7 @@ def scrape_post(link: str):
         for tag in quiz_tag.parent.find_next_siblings('p'):
           tag.decompose()
         quiz_tag.decompose()
-        print('QUIZ: '+link)
+        # print('QUIZ: ' + link)
     except:
       pass
 
@@ -155,6 +155,8 @@ def scrape_post(link: str):
   # More filters
   texts = map(lambda tag: tag.get_text(strip=True), contents) # Get texts
   texts = filter(None, texts) # Remove blanks
+  
+  # Remove TL metadata
   # this crazy ass regex list :skull:
   metadata_re_list = map(lambda x: '^'+x, [
     'TL',
@@ -190,56 +192,67 @@ def scrape_post(link: str):
     'From the Digital Special Edition',
   ])
   metadata_re = re.compile('|'.join(metadata_re_list), flags=re.IGNORECASE)
-  texts = filter(lambda x: not bool(metadata_re.match(x)), texts) # Remove TL metadata
+  texts = filter(lambda x: not bool(metadata_re.match(x)), texts) 
+
+  # Remove chapter nav from crimsonmagic.me
   chap_nav_re = re.compile(r'^\|(?: Next Chapt?er)?')
-  texts = filter(lambda x: not bool(chap_nav_re.match(x)), texts) # Remove chapter nav from crimsonmagic.me
-  texts = map(lambda x: re.compile(r'…\.+').sub('…', x), texts) # Remove trailing period from "…."
-  texts = map(lambda x: re.compile(r'(TL Note:.+?)', flags=re.IGNORECASE).sub('', x), texts) # Remove (TL Note: xxxx)
+  texts = filter(lambda x: not bool(chap_nav_re.match(x)), texts)
+
+  # Remove trailing period from "…."
+  texts = map(lambda x: re.compile(r'…\.+').sub('…', x), texts)
+
+  # Remove (TL Note: xxxx)
+  texts = map(lambda x: re.compile(r'(TL Note:.+?)', flags=re.IGNORECASE).sub('', x), texts)
+
   text = '\n'.join(list(texts))
   
-  # Special case of afterword lmao
+  # Special case of afterword needed to be removed lmao
   if title.find('Volume 10, Epilogue + Side Stories') != -1:
     text = re.sub('Author’s Afterword[\s\S]+Akatsuki Natsume\n', '', text)
 
   return (title, text)
 
 def main():
-  # links = scrape_main_page()
+  links = scrape_main_page()
   
-  # # Create data folder
-  # Path('./data').mkdir(parents=True, exist_ok=True)
+  # Create data folder
+  Path('./data').mkdir(parents=True, exist_ok=True)
 
-  # for index, link in enumerate(tqdm(links)):
-  #   id = str(index).rjust(3, '0')
+  print(f"Scraping all {len(links)} posts...")
+  for index, link in enumerate(tqdm(links)):
+    id = str(index).rjust(3, '0')
     
-  #   # if glob(f'./data/{id}*'):
-  #   #   continue # skip already downloaded
+    # if glob(f'./data/{id}*'):
+    #   continue # skip already downloaded
 
-  #   print(f'Scraping {id} {link}...')
-  #   title, text = scrape_post(link)
+    # print(f'Scraping {id} {link}...')
+    title, text = scrape_post(link)
 
-  #   if text.count('\n') <= 10:
-  #     text = '' # Skip because it's probably manga
+    if text.count('\n') <= 10:
+      text = '' # Skip because it's probably manga
 
-  #   text = f"Source: {link}\n{text}".rstrip() # Include source link in file
-  #   safe_title = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", '_', title)
+    # Include source link in file
+    text = f"Source: {link}\n{text}".rstrip()
+    # Clean the title for a safe filename
+    safe_title = re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", '_', title)
 
-  #   with open(f"./data/{id} {safe_title}.txt", 'w') as file:
-  #     file.write(text)
-  #     file.write('\n')
+    # Write to ./data folder
+    with open(f"./data/{id} {safe_title}.txt", 'w') as file:
+      file.write(text)
+      file.write('\n')
   
-  # print('Combining all chapters to konosuba.txt...')
-  # with open('konosuba.txt','wb') as wfd:
-  #   files = glob('./data/[0-9][0-9][0-9]*')
-  #   file_re = re.compile(r"(\d{3}) ")
-  #   files.sort(key=lambda x: int(file_re.search(x)[1]))
+  print('Combining all posts to konosuba.txt...')
+  with open('konosuba.txt','wb') as wfd:
+    files = glob('./data/[0-9][0-9][0-9]*')
+    file_re = re.compile(r"(\d{3}) ")
+    files.sort(key=lambda x: int(file_re.search(x)[1]))
     
-  #   for f in files:
-  #     with open(f,'rb') as fd:
-  #       fd.readline() # Skip first line (source link)
-  #       shutil.copyfileobj(fd, wfd)
+    for f in files:
+      with open(f,'rb') as fd:
+        fd.readline() # Skip first line (source link)
+        shutil.copyfileobj(fd, wfd)
   
-  print('Extracting speeches from konosuba.txt')
+  print('Extracting speeches from konosuba.txt to konosuba-speech.txt...')
   with open('konosuba.txt', 'r') as konosuba:
     lines = konosuba.readlines()
 
@@ -250,7 +263,7 @@ def main():
         return matches
       return ''
     
-    # Remove awkward ...
+    # Remove awkward ......
     silence_re = re.compile(r'^[… ]+?$')
     def filter_silence(line: str):
       return not bool(silence_re.match(line))
@@ -262,6 +275,9 @@ def main():
   
   with open('konosuba-speech.txt', 'w') as konosuba_speech:
     konosuba_speech.write(speeches_text)
+  
+  print("Done.")
+  print("Checkout konosuba.txt and konosuba-speech.txt for your Konosuba needs :p")
 
 if __name__ == '__main__':
   main()
