@@ -8,15 +8,6 @@ Volume 1 to 17 + short stories (English fan translation).
 > This might have accidentally removed some lines from the light novel, but the damage should be minimal.\
 > Feel free to create an issue if there are some lines that have been accidentally removed.
 
-## Context
-
-KonoSuba: God's Blessing on This Wonderful World!, often referred to simply as KonoSuba,
-is a Japanese light novel series written by Natsume Akatsuki.
-The series follows Kazuma Satou, a boy who is sent to a fantasy world with MMORPG elements
-following his death, where he forms a dysfunctional adventuring party with a goddess, an archwizard, and a crusader.
-
-Source: https://en.wikipedia.org/wiki/KonoSuba
-
 ## Usage
 
 Download the files below.
@@ -33,6 +24,20 @@ Shameless self-plug:
   [`aqua`](https://github.com/MarsRon/aqua).
 - Wanna make a AI chatbot? Check out
   [`kazuma`](https://github.com/MarsRon/kazuma).
+
+## Context
+
+KonoSuba: God's Blessing on This Wonderful World!, often referred to simply as KonoSuba, is a Japanese light novel series written by Natsume Akatsuki.
+The series follows Kazuma Satou, a boy who is sent to a fantasy world with MMORPG elements following his death, where he forms a dysfunctional adventuring party with a goddess (Aqua), an archwizard (Megumin), and a crusader (Darkness/Lalatina Dustiness Ford).
+
+### Premise
+
+Following an untimely and embarrassing death, Kazuma Satou, a Japanese teenage shut-in NEET, meets a goddess named Aqua, who offers to reincarnate him in a parallel world with MMORPG elements, where he can go on adventures and battle monsters.
+Despite being offered a superpowered item or ability to use in this new world, Kazuma, following some provocation, chooses Aqua herself to accompany him to the town of Axel, quickly finding her absent-mindedness to be less than beneficial.
+With Aqua unable to return to the afterlife until the Devil King is defeated, the two form a party and recruit two other members; an explosion-obsessed magician named Megumin and a masochistic crusader named Darkness.
+Due to the party's dysfunctional abilities, Kazuma quickly gives up on the idea of defeating the Devil King and tries to live a comfortable lifestyle, only to find the circumstances of his daily life are forcing him and his party to encounter and battle the Devil King's generals.
+
+Source: https://en.wikipedia.org/wiki/KonoSuba
 
 ## I wanna DIY
 
