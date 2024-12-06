@@ -27,6 +27,7 @@ Download the files below.
 |-|-|-|-|
 | [`konosuba.txt`](./konosuba.txt) | 47573 | 4.5MB | 17 volumes of KonoSuba light novel condensed into 1 file. Both dialogue and monologue are included. |
 | [`konosuba-dialogue.txt`](./konosuba-dialogue.txt) | 18689 | 2.3MB | Contains only dialogues in between quotes (`“”`). Monologue is excluded. |
+| [`konosuba-dataset.json`](./konosuba-dataset.json) | 18688 | 5.8MB | JSON array of dialogues between `user` and `assistant` to fine-tune LLMs. Data from [`konosuba-dialogue.txt`](./konosuba-dialogue.txt) Example: { [user: 1st line, assistant: 2nd line], [user: 2nd line, assistant: 3rd line], [user: 3rd line, assistant: 4th line], ... } |
 
 Shameless self-plug:
 - Wanna make a Markov chain random sentence generator? Check out
@@ -64,6 +65,16 @@ This will create a `./data` directory which temporarily stores each chapter from
 
 Then, the script will merge all the posts into `konosuba.txt` and also generate `konosuba-dialogue.txt` only from speeches.
 
+### Dataset creation
+
+Run the dataset creation script.
+```sh
+python dataset.py
+```
+
+This will create `konosuba-dataset.json` which can then be used to fine-tune LLMs such as Llama-3.2 3B.
+
+You can edit the bottom of the script to choose compact JSON format (default), pretty-print JSON format or CSV format.
 
 ## Acknowledgements
 
