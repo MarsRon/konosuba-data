@@ -8,7 +8,6 @@ Volume 1 to 17 + short stories (English fan translation).
 > This might have accidentally removed some lines from the light novel, but the damage should be minimal.\
 > Feel free to create an issue if there are some lines that have been accidentally removed.
 
-
 ## Context
 
 KonoSuba: God's Blessing on This Wonderful World!, often referred to simply as KonoSuba,
@@ -17,7 +16,6 @@ The series follows Kazuma Satou, a boy who is sent to a fantasy world with MMORP
 following his death, where he forms a dysfunctional adventuring party with a goddess, an archwizard, and a crusader.
 
 Source: https://en.wikipedia.org/wiki/KonoSuba
-
 
 ## Usage
 
@@ -30,33 +28,37 @@ Download the files below.
 | [`konosuba-dataset.json`](./konosuba-dataset.json) | 18688 | 5.8MB | JSON array of dialogues between `user` and `assistant` to fine-tune LLMs. Data from [`konosuba-dialogue.txt`](./konosuba-dialogue.txt) Example: { [user: 1st line, assistant: 2nd line], [user: 2nd line, assistant: 3rd line], [user: 3rd line, assistant: 4th line], ... } |
 
 Shameless self-plug:
-- Wanna make a Markov chain random sentence generator? Check out
-[`aqua`](https://github.com/MarsRon/aqua).
-- Wanna make a AI chatbot? Check out
-[`kazuma`](https://github.com/MarsRon/kazuma).
 
+- Wanna make a Markov chain random sentence generator? Check out
+  [`aqua`](https://github.com/MarsRon/aqua).
+- Wanna make a AI chatbot? Check out
+  [`kazuma`](https://github.com/MarsRon/kazuma).
 
 ## I wanna DIY
 
 If you want to manually generate the data yourself, I recommend using a proxy/VPN before running the webscraper.
 
 Clone the project.
+
 ```sh
 git clone https://github.com/MarsRon/konosuba-data
 ```
 
 Create a Python virtual environment.
+
 ```sh
 python3 -m venv venv
 source venv/bin/activate
 ```
 
 Install libraries.
+
 ```sh
 pip install -r requirements.txt
 ```
 
 Run the webscraper.
+
 ```sh
 python scrape.py
 ```
@@ -68,6 +70,7 @@ Then, the script will merge all the posts into `konosuba.txt` and also generate 
 ### Dataset creation
 
 Run the dataset creation script.
+
 ```sh
 python dataset.py
 ```
@@ -81,12 +84,10 @@ You can edit the bottom of the script to choose compact JSON format (default), p
 The data is scraped from [cgtranslations.me](https://cgtranslations.me/konosuba)
 and [crimsonmagic.me](https://crimsonmagic.me/konosuba/volumes-10-plus/).
 
-
 ## License
 
 Distributed under the MIT License.
 See [`LICENSE.md`](./LICENSE.md) for more information.
-
 
 ## Contact
 
